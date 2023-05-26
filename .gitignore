@@ -1,3 +1,7 @@
+# Bird data
+ebd_NL_relMar-2023.txt
+nl_df.feather
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
