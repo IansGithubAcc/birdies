@@ -2,7 +2,7 @@ from dash import Input, Output, State, dcc, html
 import pandas as pd
 from functions import plot_density_map, get_image_url, get_code, get_name
 from pathlib import Path
-from birdies import app
+from .init_app import app
 
 @app.callback(
     Output(f"header", "children"),

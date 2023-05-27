@@ -1,5 +1,5 @@
 from dash import Output, Input, State
-from birdies import app
+from .init_app import app
 # we use a callback to toggle the collapse on small screens
 
 @app.callback(
