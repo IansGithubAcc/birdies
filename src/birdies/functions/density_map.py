@@ -2,7 +2,7 @@
 import geopy.distance
 import plotly.express as px
 import pandas as pd
-import numpy as np
+from pathlib import Path
 
 def plot_density_map(bird_df:'pd.DataFrame', df:'pd.DataFrame'):
     density_map_list = []
@@ -22,7 +22,7 @@ def plot_density_map(bird_df:'pd.DataFrame', df:'pd.DataFrame'):
     return fig
 
 # %%
-df = pd.read_feather(r'C:\Users\ianmu\Desktop\birds\new_app\data\nl_df.feather')
+df = pd.read_feather(Path(__file__).parent.parent/'data'/'nl_df.feather')
 df = df.set_index(['lat_km', 'lon_km'])
 bird_df = df[df['COMMON NAME'] == 'Common Chaffinch']
 
