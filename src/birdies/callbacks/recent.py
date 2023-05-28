@@ -1,51 +1,18 @@
-# %%
-"""TODO: fix next and prev button -> make them update and index. Let this index select the DD value. """
-from dash import Dash, html, dcc, Output, Input, dash_table
+from dash import html, Output, Input, dash_table
 from ebird.api import get_nearby_observations
 import requests
 from bs4 import BeautifulSoup
 import json
 from pathlib import Path
+from .init_app import app
 
 api_key='tkm5gu05mifl'
-app = Dash(__name__)
 
-path = Path(__file__).parent / 'locales_dict.txt'
+path = Path(__file__).parent.parent/ 'data' / 'locales_dict.txt'
 with open(path) as file:
     locales_dict = json.load(file)
 
 locales = list(locales_dict.keys())
-
-app.layout = html.Div([
-    dcc.Tabs(id="tabs", value='Photo', children=[
-        dcc.Tab(label='Photo', value='Photo'),
-        dcc.Tab(label='Details', value='Details'),
-    ]),
-    dcc.Geolocation(id="geolocation"),
-    dcc.Store(id='records', storage_type='local'),
-    
-    dcc.Dropdown([], id='dropdown', style={'float':'left', "width": "100%"}),
-    html.Div(id='tabs-outer', children= [
-        dcc.Loading(id="loading", children=[html.Div(id="loading_output")], type="circle"),
-        html.Div(id='tabs-content', style={"text-align": "center"})
-    ]),
-
-    html.Div([
-        html.Div([
-            html.Div([
-            dcc.Input(id="latitude", placeholder="Latitude", type="number", style={'width': '97%'}),
-            dcc.Input(id="longitude", placeholder="Longitude", type="number", style={'width': '97%'}),
-            ], style={'float':'left', 'width': '50%'}),
-            html.Button("My location", id="update_btn", style={'float':'right', 'width':'50%', 'height':'42.67px'}),
-        ], style={'width': '50%', 'float': 'left'}),
-    html.Div([
-        dcc.Dropdown(locales, id='locales', value='English', style={"width": "100%"}),
-    ], style={"width": "50%", 'float': 'right'})
-    ], style={"width": "100%", 'float': 'left'}),
-
-    html.Button(html.H4('<'), style={'width':"50%", 'display': 'inline-block'}, id='previous'),
-    html.Button(html.H4('>'), style={'width':"50%", 'display': 'inline-block'}, id='next')
-])
 
 # set location
 @app.callback(
@@ -53,14 +20,23 @@ app.layout = html.Div([
     Output('longitude', 'value'),
     Output("geolocation", "update_now"),
     Input("geolocation", "position"),
-    Input("update_btn", "n_clicks")
+    Input("update_btn", "n_clicks"),
+    Input('loc', 'hash')
 )
-def set_location(loc, n_clicks):
-    update_now = True if n_clicks and n_clicks > 0 else False
-    if loc is not None:
-        return loc['lat'], loc['lon'], update_now
+def set_location(loc, n_clicks, url_loc):
+    if n_clicks is not None and n_clicks > 0:
+        update_now = True if n_clicks and n_clicks > 0 else False
+        if loc is not None:
+            return loc['lat'], loc['lon'], update_now
+        else:
+            return '', '', update_now
     else:
-        return '', '', update_now
+        if type(url_loc)==str and url_loc[0] == '#':
+            lat, lon = url_loc[1:].split('_')
+            return round(float(lat),3), round(float(lon),3), False
+        
+        else:
+            return '', '', False
 
 # Get birds and set dropdown
 @app.callback(
@@ -87,7 +63,7 @@ def set_bird_data(lat, lon, next_clicks, previous_clicks, locale):
 
 # Resets the clicks when selecting a bird
 @app.callback(
-    Output('tabs-content', 'n_clicks'),
+    Output('recent-tabs-content', 'n_clicks'),
     Input('dropdown', 'value'),
 )
 def set_bird(bird_entry):
@@ -99,12 +75,13 @@ def set_bird(bird_entry):
 
 # set main content
 @app.callback(
-    Output("loading_output", "children"), 
-    Output('tabs-content', 'children'),
+    Output("recent_loading_output", "children"), 
+    Output('recent-tabs-content', 'children', allow_duplicate=True),
     Input('dropdown', 'value'),
     Input('records', 'data'),
-    Input('tabs-content', 'n_clicks'),
-    Input('tabs', 'value')
+    Input('recent-tabs-content', 'n_clicks'),
+    Input('tabs', 'value'), 
+    prevent_initial_call=True
 )
 def set_main(bird_entry, bird_dicts, n_clicks, tabs):
     if bird_dicts != [] and bird_entry is not None:
@@ -139,35 +116,3 @@ def set_main(bird_entry, bird_dicts, n_clicks, tabs):
             return  True, html.Div(children=dash_table.DataTable([{'key':key,'value':value} for key, value in bird_dict.items()], [{"name": i, "id": i} for i in ['key', 'value']]))
     else:
         return True, []
-
-if __name__ == '__main__':
-    app.run_server(debug=True, use_reloader=False)
-
-
-# %% Create language dict
-from ebird.api import constants
-from iso639 import languages
-import json
-
-locales = list(constants.LOCALES.values())
-locales.remove('iw')
-locales.sort()
-locales_dict = {}
-for locale in locales:
-    locale_parts = locale.split('_')
-    if len(locale_parts) == 1:
-        locales_dict[languages.get(alpha2=locale).name] = locale
-    
-    else:
-        try:
-            comment = languages.get(alpha2=locale_parts[1].lower()).name
-        except:
-            comment = locale_parts[1]
-
-        locales_dict[languages.get(alpha2=locale_parts[0]).name + f' ({comment})'] = locale
-
-path = Path(__file__).parent / 'locales_dict.txt'
-with open(path, 'w') as file:
-    file.write(json.dumps(locales_dict))
-
-# %%
