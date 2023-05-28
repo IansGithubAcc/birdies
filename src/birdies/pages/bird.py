@@ -8,6 +8,7 @@ meta_tags = {
 dash.register_page(__name__, meta_tags=meta_tags)
 
 layout = html.Div(children=[
+    dcc.Location(id='bird_url_loc'),
     dcc.Store(id='input', data={"common_name":"European Robin"}),
     html.H1(id='header', children='No bird chosen', style={'zIndex':1}),
 

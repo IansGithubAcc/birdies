@@ -11,10 +11,9 @@ nav_item_recent = dbc.NavItem(dbc.NavLink("Recent", href="/recent"))
 # make a reuseable dropdown for the different examples
 dropdown = dbc.DropdownMenu(
     children=[
-        dbc.DropdownMenuItem("Entry 1"),
-        dbc.DropdownMenuItem("Entry 2"),
-        dbc.DropdownMenuItem(divider=True),
-        dbc.DropdownMenuItem("Entry 3"),
+        dbc.DropdownMenuItem("Select location", href='map'),
+        dbc.DropdownMenuItem("Recent spots", href='recent'),
+        dbc.DropdownMenuItem("Bird details", href='bird'),
     ],
     nav=True,
     in_navbar=True,
@@ -64,7 +63,8 @@ navbar = dbc.Navbar(
             dbc.NavbarToggler(id="logo-navbar-toggler", n_clicks=0),
             dbc.Collapse(
                 dbc.Nav(
-                    [search, nav_item_bird, nav_item_recent, dropdown],
+                    # search, nav_item_bird, nav_item_recent, 
+                    [dropdown],
                     className="ms-auto",
                     navbar=True,
                 ),

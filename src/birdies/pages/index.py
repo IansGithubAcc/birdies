@@ -10,8 +10,13 @@ dash.register_page(__name__, path='/', meta_tags=meta_tags)
 layout = html.Div(children=[
     html.H1(children='Welcome!'),
 
-    html.Div(children='''
-        This is the index page.
-    '''),
-
+    html.Div([
+        dash.dcc.Link('Map', href='map'),
+    ]),
+    html.Div([
+        dash.dcc.Link('Recent spots', href='recent'),
+    ]),
+    html.Div([
+        dash.dcc.Link('Bird', href='bird'),
+    ]),
 ])

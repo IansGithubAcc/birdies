@@ -21,22 +21,20 @@ locales = list(locales_dict.keys())
     Output("geolocation", "update_now"),
     Input("geolocation", "position"),
     Input("update_btn", "n_clicks"),
-    Input('loc', 'hash')
+    Input('recent_url_loc', 'hash'),
 )
 def set_location(loc, n_clicks, url_loc):
     if n_clicks is not None and n_clicks > 0:
         update_now = True if n_clicks and n_clicks > 0 else False
         if loc is not None:
             return loc['lat'], loc['lon'], update_now
-        else:
-            return '', '', update_now
-    else:
-        if type(url_loc)==str and url_loc[0] == '#':
+        
+    elif url_loc != '' and url_loc[0] == '#' and len(url_loc[1:].split('_'))==2:
             lat, lon = url_loc[1:].split('_')
             return round(float(lat),3), round(float(lon),3), False
-        
-        else:
-            return '', '', False
+
+    else:
+        return '', '', False
 
 # Get birds and set dropdown
 @app.callback(
@@ -77,6 +75,7 @@ def set_bird(bird_entry):
 @app.callback(
     Output("recent_loading_output", "children"), 
     Output('recent-tabs-content', 'children', allow_duplicate=True),
+    Output('go_to_bird', 'href'),
     Input('dropdown', 'value'),
     Input('records', 'data'),
     Input('recent-tabs-content', 'n_clicks'),
@@ -109,10 +108,10 @@ def set_main(bird_entry, bird_dicts, n_clicks, tabs):
             n_clicks = 0 if n_clicks is None else n_clicks%(max(1, len(img_tags)-2))
             if len(img_tags) > 0:
                 img_url = img_tags[n_clicks]['src']
-                return True, html.Div(children=[html.Img(src=img_url, style={"max-height": "65vh", "max-width": "100%"})])
+                return True, html.Div(children=[html.Img(src=img_url, style={"max-height": "65vh", "max-width": "100%"})]), f"/bird#{bird_dict['speciesCode']}"
             else:
-                return True, html.Div(children='No image url found')
+                return True, html.Div(children='No image url found'), f"/bird#{bird_dict['speciesCode']}"
         else:
-            return  True, html.Div(children=dash_table.DataTable([{'key':key,'value':value} for key, value in bird_dict.items()], [{"name": i, "id": i} for i in ['key', 'value']]))
+            return  True, html.Div(children=dash_table.DataTable([{'key':key,'value':value} for key, value in bird_dict.items()], [{"name": i, "id": i} for i in ['key', 'value']])), f"/bird#{bird_dict['speciesCode']}"
     else:
-        return True, []
+        return True, [], ''

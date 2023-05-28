@@ -41,11 +41,14 @@ def set_main(tab, _input):
     
 @app.callback(
     Output("input", "data"),
-    Input("search_button", "n_clicks"),
-    State("search", 'value')
+    # Input("search_button", "n_clicks"),
+    Input('bird_url_loc', 'hash'),
+    # State("search", 'value')
 )
-def search(_, bad_name):
-    code = get_code(bad_name)
+def search(url_hash):
+    # code = get_code(bad_name)
+    # if code is None and url_hash != '':
+    code = url_hash[1:] if url_hash is not None and url_hash != '' else ''
     common_name = get_name(code) if code is not None else "Cannot find bird..."
     _dict = {
         "common_name":common_name,

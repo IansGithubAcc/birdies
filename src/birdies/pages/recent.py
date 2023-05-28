@@ -1,7 +1,7 @@
 """TODO: fix next and prev button -> make them update and index. Let this index select the DD value. """
 from dash import Dash, html, dcc, Output, Input, dash_table, register_page
 from ebird.api import get_nearby_observations
-import requests
+import dash_bootstrap_components as dbc
 from bs4 import BeautifulSoup
 import json
 from pathlib import Path
@@ -20,10 +20,10 @@ with open(path) as file:
 locales = list(locales_dict.keys())
 
 layout = html.Div([
-    dcc.Location(id='loc'),
+    dcc.Location(id='recent_url_loc'),
     dcc.Tabs(id="tabs", value='Photo', children=[
-        dcc.Tab(label='Photo', value='Photo'),
-        dcc.Tab(label='Details', value='Details'),
+        dcc.Tab(label='Bird photo', value='Photo'),
+        dcc.Tab(label='Spot Details', value='Details'),
     ]),
     dcc.Geolocation(id="geolocation"),
     dcc.Store(id='records', storage_type='local'),
@@ -48,6 +48,7 @@ layout = html.Div([
     ], style={"width": "100%", 'float': 'left'}),
 
     html.Button(html.H4('<'), style={'width':"50%", 'display': 'inline-block'}, id='previous'),
-    html.Button(html.H4('>'), style={'width':"50%", 'display': 'inline-block'}, id='next')
+    html.Button(html.H4('>'), style={'width':"50%", 'display': 'inline-block'}, id='next'),
+    dbc.Button(html.H5('Bird details'), style={'width':"100%", 'display': 'inline-block'}, id='go_to_bird')
 ])
 
